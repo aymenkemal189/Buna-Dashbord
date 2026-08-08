@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ቡና ኤርድሮፕ — Admin Dashboard</title>
+<style>
+  :root {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --bg-dark: #0f172a;
+    --card-bg: rgba(255,255,255,.08);
+    --card-border: rgba(255,255,255,.15);
+    --text-muted: #94a3b8;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body {
+    background: linear-gradient(160deg,#064e3b,#022c22 40%,var(--bg-dark));
+    color: #fff; min-height: 100vh; padding: 16px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: var(--text-muted); font-size: 12px; margin-bottom: 18px; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+  @media (min-width: 600px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+  .stat-card {
+    border: 1px solid var(--card-border); background: var(--card-bg);
+    border-radius: 14px; padding: 14px; text-align: center;
+  }
+  .stat-card .val { font-size: 22px; font-weight: 800; color: var(--primary); }
+  .stat-card .lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .section {
+    border: 1px solid var(--card-border); background: var(--card-bg);
+    border-radius: 16px; padding: 16px; margin-bottom: 18px;
+  }
+  .section-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .section-hdr h2 { font-size: 15px; font-weight: 700; }
+  .refresh-btn {
+    background: var(--card-bg); border: 1px solid var(--card-border); color: #fff;
+    padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;
+  }
+
+  input[type=text] {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--card-border);
+    background: rgba(0,0,0,.2); color: #fff; font-size: 13px; margin-bottom: 12px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead th {
+    text-align: left; padding: 8px 6px; color: var(--text-muted); font-weight: 600;
+    border-bottom: 1px solid var(--card-border); white-space: nowrap;
+  }
+  tbody td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.06); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  .balance-cell { color: var(--primary); font-weight: 700; }
+  .table-scroll { overflow-x: auto; }
+
+  .badge { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge.pending { background: rgba(245,158,11,.2); color: var(--warning); }
+  .badge.approved { background: rgba(16,185,129,.2); color: var(--primary); }
+  .badge.rejected { background: rgba(239,68,68,.2); color: var(--danger); }
+
+  .btn { border: 0; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; margin-right: 4px; }
+  .btn-approve { background: var(--primary); color: #022c22; }
+  .btn-reject { background: var(--danger); color: #fff; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .empty-msg { color: var(--text-muted); font-size: 12.5px; text-align: center; padding: 20px 0; }
+  .loading { color: var(--text-muted); font-size: 12.5px; text-align: center; padding: 20px 0; }
+
+  #configWarning {
+    display: none; background: rgba(239,68,68,.15); border: 1px solid var(--danger);
+    border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>☕ ቡና ኤርድሮፕ — Admin Dashboard</h1>
+  <p class="subtitle">Live data from Google Sheet · no login required (keep this link private)</p>
+
+  <div id="configWarning">⚠️ SCRIPT_URL አልተቀናበረም። ከታች ባለው script tag ውስጥ የApps Script deployment URL ይለጥፉ።</div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val" id="statUsers">—</div><div class="lbl">Total Users</div></div>
+    <div class="stat-card"><div class="val" id="statBalance">—</div><div class="lbl">Total Balance (ETB)</div></div>
+    <div class="stat-card"><div class="val" id="statPendingCount">—</div><div class="lbl">Pending Withdrawals</div></div>
+    <div class="stat-card"><div class="val" id="statPendingAmount">—</div><div class="lbl">Pending Amount (ETB)</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-hdr">
+      <h2>💰 Pending Withdrawals</h2>
+      <button class="refresh-btn" onclick="loadWithdrawals()">↻ Refresh</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Time</th><th>User ID</th><th>Method</th><th>Account</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody id="withdrawalsBody"></tbody>
+      </table>
+      <div id="withdrawalsEmpty" class="empty-msg" style="display:none;">No withdrawals yet</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-hdr">
+      <h2>👥 Users</h2>
+      <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
+    </div>
+    <input type="text" id="searchInput" placeholder="🔍 Search by User ID..." oninput="onSearchInput()">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>User ID</th><th>Balance</th><th>Referrals</th><th>Ad Progress</th><th>Tasks Done</th><th>Last Active</th></tr>
+        </thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+      <div id="usersEmpty" class="empty-msg" style="display:none;">No users found</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGt4mVDt9b62uyE8x5mqZjlLYS2U3avQtxWQYB02qnezx8UpSG5Ky8i2SoAO1u7e1L/exec";
+
+  let searchTimeout;
+
+  window.onload = () => {
+    if (!SCRIPT_URL.startsWith("http")) {
+      document.getElementById("configWarning").style.display = "block";
+      return;
+    }
+    loadStats();
+    loadWithdrawals();
+    loadUsers();
+  };
+
+  async function apiCall(params) {
+    const url = `${SCRIPT_URL}?${new URLSearchParams(params).toString()}`;
+    const res = await fetch(url);
+    return res.json();
+  }
+
+  async function loadStats() {
+    try {
+      const data = await apiCall({ action: "getDashboardStats" });
+      if (data.success) {
+        document.getElementById("statUsers").innerText = data.totalUsers.toLocaleString();
+        document.getElementById("statBalance").innerText = data.totalBalance.toLocaleString();
+        document.getElementById("statPendingCount").innerText = data.pendingCount.toLocaleString();
+        document.getElementById("statPendingAmount").innerText = data.pendingAmount.toLocaleString();
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadWithdrawals() {
+    const body = document.getElementById("withdrawalsBody");
+    const empty = document.getElementById("withdrawalsEmpty");
+    body.innerHTML = '<tr><td colspan="7" class="loading">Loading...</td></tr>';
+    empty.style.display = "none";
+
+    try {
+      const data = await apiCall({ action: "getWithdrawals" });
+      if (!data.success) { body.innerHTML = ""; return; }
+
+      const pending = data.withdrawals.filter(w => w.status === "Pending");
+      const others = data.withdrawals.filter(w => w.status !== "Pending");
+      const list = [...pending, ...others];
+
+      if (list.length === 0) {
+        body.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+
+      body.innerHTML = list.map(w => `
+        <tr>
+          <td>${w.timestamp}</td>
+          <td>${w.userId}</td>
+          <td>${w.method}</td>
+          <td>${w.account}</td>
+          <td class="balance-cell">${w.amount.toLocaleString()} ETB</td>
+          <td><span class="badge ${w.status.toLowerCase()}">${w.status}</span></td>
+          <td>
+            ${w.status === "Pending"
+              ? `<button class="btn btn-approve" onclick="actOnWithdrawal(${w.rowIndex}, 'approve', this)">✓ Approve</button>
+                 <button class="btn btn-reject" onclick="actOnWithdrawal(${w.rowIndex}, 'reject', this)">✕ Reject</button>`
+              : "—"}
+          </td>
+        </tr>
+      `).join("");
+    } catch (e) {
+      body.innerHTML = '<tr><td colspan="7" class="loading">Error loading data</td></tr>';
+    }
+  }
+
+  async function actOnWithdrawal(rowIndex, action, btnEl) {
+    const row = btnEl.closest("tr");
+    row.querySelectorAll("button").forEach(b => b.disabled = true);
+
+    try {
+      const data = await apiCall({
+        action: action === "approve" ? "approveWithdrawal" : "rejectWithdrawal",
+        rowIndex: rowIndex
+      });
+      if (data.success) {
+        loadWithdrawals();
+        loadStats();
+        loadUsers();
+      } else {
+        alert(data.message);
+        row.querySelectorAll("button").forEach(b => b.disabled = false);
+      }
+    } catch (e) {
+      alert("Error: " + e.message);
+      row.querySelectorAll("button").forEach(b => b.disabled = false);
+    }
+  }
+
+  function onSearchInput() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(loadUsers, 400);
+  }
+
+  async function loadUsers() {
+    const body = document.getElementById("usersBody");
+    const empty = document.getElementById("usersEmpty");
+    const search = document.getElementById("searchInput").value.trim();
+    body.innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
+    empty.style.display = "none";
+
+    try {
+      const data = await apiCall({ action: "getUsers", search: search });
+      if (!data.success) { body.innerHTML = ""; return; }
+
+      if (data.users.length === 0) {
+        body.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+
+      body.innerHTML = data.users.map(u => `
+        <tr>
+          <td>${u.userId}</td>
+          <td class="balance-cell">${u.balance.toLocaleString()} ETB</td>
+          <td>${u.referrals}</td>
+          <td>${u.adProgress}</td>
+          <td>${u.completedTasks ? u.completedTasks.split(",").length : 0}</td>
+          <td>${u.lastActive}</td>
+        </tr>
+      `).join("");
+    } catch (e) {
+      body.innerHTML = '<tr><td colspan="6" class="loading">Error loading data</td></tr>';
+    }
+  }
+</script>
+</body>
+</html>
