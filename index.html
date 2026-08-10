@@ -21,8 +21,14 @@
     color: #fff; min-height: 100vh; padding: 16px;
   }
   .wrap { max-width: 960px; margin: 0 auto; }
-  h1 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-  .subtitle { color: var(--text-muted); font-size: 12px; margin-bottom: 18px; }
+  .brand-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .brand-logo {
+    width: 48px; height: 48px; border-radius: 14px; object-fit: cover;
+    border: 1px solid var(--card-border); flex: 0 0 48px;
+    box-shadow: 0 6px 16px -6px rgba(16,185,129,.4);
+  }
+  h1 { font-size: 19px; font-weight: 800; margin-bottom: 3px; }
+  .subtitle { color: var(--text-muted); font-size: 12px; }
 
   .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
   @media (min-width: 600px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -80,8 +86,13 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>☕ ቡና ኤርድሮፕ — Admin Dashboard</h1>
-  <p class="subtitle">Live data from Google Sheet · no login required (keep this link private)</p>
+  <div class="brand-header">
+    <img src="https://i.postimg.cc/0QgVXWXK/20260809-234658.jpg" alt="Buna Airdrop" class="brand-logo">
+    <div>
+      <h1>ቡና ኤርድሮፕ — Admin Dashboard</h1>
+      <p class="subtitle">Live data from Google Sheet · no login required (keep this link private)</p>
+    </div>
+  </div>
 
   <div id="configWarning">⚠️ SCRIPT_URL አልተቀናበረም። ከታች ባለው script tag ውስጥ የApps Script deployment URL ይለጥፉ።</div>
 
@@ -113,11 +124,11 @@
       <h2>👥 Users</h2>
       <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
     </div>
-    <input type="text" id="searchInput" placeholder="🔍 Search by User ID..." oninput="onSearchInput()">
+    <input type="text" id="searchInput" placeholder="🔍 Search by User ID or Username..." oninput="onSearchInput()">
     <div class="table-scroll">
       <table>
         <thead>
-          <tr><th>User ID</th><th>Balance</th><th>Referrals</th><th>Ad Progress</th><th>Tasks Done</th><th>Last Active</th></tr>
+          <tr><th>User ID</th><th>Username</th><th>Balance</th><th>Referrals</th><th>Ad Progress</th><th>Tasks Done</th><th>Last Active</th></tr>
         </thead>
         <tbody id="usersBody"></tbody>
       </table>
@@ -127,7 +138,8 @@
 </div>
 
 <script>
-                  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylSsRt7gluxwDTS2QXcq4V5W80h2QCoQ2c8KenScwWTWcKeH3-hgJaBEc3ejKl4Bhj/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylSsRt7gluxwDTS2QXcq4V5W80h2QCoQ2c8KenScwWTWcKeH3-hgJaBEc3ejKl4Bhj/exec";
+
   let searchTimeout;
 
   window.onload = () => {
@@ -247,6 +259,7 @@
       body.innerHTML = data.users.map(u => `
         <tr>
           <td>${u.userId}</td>
+          <td>${u.username ? "@" + u.username : "—"}</td>
           <td class="balance-cell">${u.balance.toLocaleString()} ETB</td>
           <td>${u.referrals}</td>
           <td>${u.adProgress}</td>
