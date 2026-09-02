@@ -19,7 +19,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
   body {
     background: linear-gradient(180deg, #04241a 0%, #090e17 500px, var(--bg-dark));
-    color: #fff; min-height: 100vh; padding: 12px; padding-bottom: 40px;
+    color: #fff; min-height: 100vh; padding: 12px; padding-bottom: 50px;
   }
   .wrap { max-width: 900px; margin: 0 auto; }
 
@@ -46,12 +46,12 @@
     backdrop-filter: blur(5px); z-index: 99;
   }
   .drawer {
-    position: fixed; top: 0; right: -100%; width: 85%; max-width: 380px; height: 100vh;
+    position: fixed; top: 0; right: -100%; width: 88%; max-width: 400px; height: 100vh;
     background: #0f172a; z-index: 100; padding: 20px; box-shadow: -5px 0 25px rgba(0,0,0,0.8);
     transition: right 0.3s ease; overflow-y: auto; border-left: 1px solid var(--card-border);
   }
   .drawer.open { right: 0; }
-  .drawer-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; }
+  .drawer-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; }
   .close-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
 
   .time-filter-wrap {
@@ -126,7 +126,7 @@
     </div>
   </div>
 
-  <!-- Time Filter Tabs (1h, 24h, 48h, 7d, 1m) -->
+  <!-- Time Filter Tabs -->
   <div class="time-filter-wrap">
     <div class="time-pill active" onclick="setTimeFilter('1h', this)">1 ሰዓት</div>
     <div class="time-pill" onclick="setTimeFilter('24h', this)">24 ሰዓት</div>
@@ -135,7 +135,7 @@
     <div class="time-pill" onclick="setTimeFilter('1m', this)">1 ወር</div>
   </div>
 
-  <!-- Dynamic Stats Grid -->
+  <!-- Stats Grid -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="val" id="statUsers">0</div>
@@ -155,11 +155,11 @@
     </div>
   </div>
 
-  <!-- Live Users Table -->
+  <!-- Users Table -->
   <div class="section">
     <div class="section-hdr">
       <h2>👥 የተጠቃሚዎች ዝርዝር (Live Users)</h2>
-      <button class="refresh-btn" onclick="loadLiveSheetData()">↻ Refresh</button>
+      <button class="refresh-btn" onclick="fetchSheetData()">↻ Refresh</button>
     </div>
     <input type="text" id="searchInput" placeholder="🔍 በ User ID ፈልግ..." oninput="onSearchInput()">
     <div class="table-scroll">
@@ -168,30 +168,34 @@
           <tr><th>User ID</th><th>Balance</th><th>Referrals</th><th>Tasks</th><th>Status</th></tr>
         </thead>
         <tbody id="usersBody">
-          <tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">ዳታ እየጫነ ነው...</td></tr>
+          <tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">ዳታ እየተጫነ ነው...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- 📢 3-LINE DRAWER: TELEGRAM BROADCAST -->
+<!-- 📢 3-LINE DRAWER: BROADCAST SUITE -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-hdr">
-    <h3 style="font-size: 16px;">📢 Telegram Broadcast (Railway)</h3>
+    <h3 style="font-size: 16px;">📢 Telegram Broadcast</h3>
     <button class="close-btn" onclick="closeDrawer()">✕</button>
   </div>
 
   <div style="display: flex; flex-direction: column; gap: 4px;">
-    <input type="text" id="railwayUrl" placeholder="Railway URL (https://...up.railway.app)">
-    <input type="password" id="adminKey" placeholder="Admin Key (የይለፍ ቃል)">
-    <input type="text" id="bcPhoto" placeholder="የፎቶ ሊንክ (Photo URL - አማራጭ)">
-    <textarea id="bcText" rows="4" placeholder="የመልእክት ጽሑፍ (HTML tags ይቻላል: <b>ደማቅ</b>)"></textarea>
-    <input type="text" id="btnText" placeholder="Button Text (ለምሳሌ: 🚀 ቦቱን ክፈት)">
-    <input type="text" id="btnUrl" placeholder="Button URL (https://t.me/...)">
+    <input type="text" id="serverUrl" value="https://buna-server.onrender.com" readonly style="opacity:0.7;">
+    <input type="password" id="adminKey" value="buna_admin_2026" readonly style="opacity:0.7;">
 
-    <button class="btn btn-primary" style="margin-top: 6px;" onclick="startBroadcast()">🚀 ለሁሉም ላክ (Broadcast)</button>
+    <input type="text" id="bcPhoto" placeholder="የፎቶ ሊንክ (Photo URL - አማራጭ)">
+    <textarea id="bcText" rows="4" placeholder="የመልእክት ጽሑፍ..."></textarea>
+    
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+      <input type="text" id="btnText" placeholder="Button Text (ለምሳሌ: 🚀 ክፈት)">
+      <input type="text" id="btnUrl" placeholder="Button Link URL">
+    </div>
+
+    <button class="btn btn-primary" style="margin-top: 10px; padding:12px;" onclick="startBroadcast()">🚀 ለ 7,800+ ተጠቃሚዎች ላክ</button>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px;">
       <button class="btn btn-warning" onclick="controlBroadcast('pause')">⏸ Pause</button>
@@ -199,8 +203,8 @@
       <button class="btn btn-danger" onclick="controlBroadcast('stop')">⏹ Stop</button>
     </div>
 
-    <!-- Progress Tracker -->
-    <div id="progressBox" style="margin-top: 15px; display: none; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+    <!-- Live Progress Bar -->
+    <div id="progressBox" style="margin-top: 12px; display: none; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
       <div style="display:flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
         <span id="progressText">0 / 0</span>
         <span id="progressPercent" style="color:var(--primary); font-weight:bold;">0%</span>
@@ -215,100 +219,84 @@
 
 <script>
   const SHEET_ID = "1eEH9iqxatFEuaxdT0l6ya4uzWyHtAqn_QClPFG21edk";
-  const DIRECT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+  const DIRECT_JSON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
   let allUsers = [];
   let currentFilter = "1h";
 
   window.onload = () => {
-    if (localStorage.getItem("rUrl")) document.getElementById("railwayUrl").value = localStorage.getItem("rUrl");
-    if (localStorage.getItem("rKey")) document.getElementById("adminKey").value = localStorage.getItem("rKey");
-    
-    loadLiveSheetData();
+    fetchSheetData();
   };
 
-  function openDrawer() {
-    document.getElementById("drawer").classList.add("open");
-    document.getElementById("drawerOverlay").style.display = "block";
-  }
-  function closeDrawer() {
-    document.getElementById("drawer").classList.remove("open");
-    document.getElementById("drawerOverlay").style.display = "none";
-  }
+  function openDrawer() { document.getElementById("drawer").classList.add("open"); document.getElementById("drawerOverlay").style.display = "block"; }
+  function closeDrawer() { document.getElementById("drawer").classList.remove("open"); document.getElementById("drawerOverlay").style.display = "none"; }
 
-  // የጊዜ ማጣሪያዎችን የማስሊያ ፈንክሽን
   function setTimeFilter(filter, el) {
     document.querySelectorAll(".time-pill").forEach(p => p.classList.remove("active"));
     el.classList.add("active");
     currentFilter = filter;
     document.getElementById("timeLabel").innerText = el.innerText;
-    calculateTimeFilteredStats();
+    updateActiveStats();
   }
 
-  function calculateTimeFilteredStats() {
+  function updateActiveStats() {
     if (allUsers.length === 0) return;
+    let ratio = 0.15;
+    if (currentFilter === "1h") ratio = 0.15;
+    else if (currentFilter === "24h") ratio = 0.45;
+    else if (currentFilter === "48h") ratio = 0.68;
+    else if (currentFilter === "7d") ratio = 0.88;
+    else if (currentFilter === "1m") ratio = 1.0;
 
-    let ratio = 1;
-    // የተጠቃሚዎችን ንቁነት በጊዜ ማዕቀፍ የማስላት ሎጂክ
-    if (currentFilter === "1h") ratio = 0.12;      // ባለፈው 1 ሰዓት ውስጥ ንቁ የሆኑት (~12%)
-    else if (currentFilter === "24h") ratio = 0.45; // ባለፉት 24 ሰዓታት ውስጥ (~45%)
-    else if (currentFilter === "48h") ratio = 0.68; // ባለፉት 48 ሰዓታት ውስጥ (~68%)
-    else if (currentFilter === "7d") ratio = 0.88;  // በ 7 ቀናት ውስጥ (~88%)
-    else if (currentFilter === "1m") ratio = 1.0;   // በ 1 ወር ውስጥ (100%)
-
-    // የቅርብ ጊዜ የተመዘገቡትን ወይም ንቁ የሆኑትን ተጠቃሚዎች ብዛት መለየት
-    const activeCount = Math.round(allUsers.length * ratio);
-    document.getElementById("statActive").innerText = activeCount.toLocaleString();
+    document.getElementById("statActive").innerText = Math.round(allUsers.length * ratio).toLocaleString();
   }
 
-  async function loadLiveSheetData() {
+  async function fetchSheetData() {
     const body = document.getElementById("usersBody");
     body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">የ7,800+ ተጠቃሚዎች ዳታ እየተጫነ ነው...</td></tr>';
 
     try {
-      const res = await fetch(DIRECT_CSV_URL);
-      const csvText = await res.text();
-      const rows = parseCSV(csvText);
+      const res = await fetch(DIRECT_JSON_URL);
+      const text = await res.text();
+      const jsonText = text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1);
+      const data = JSON.parse(jsonText);
 
       allUsers = [];
-      let totalBal = 0;
-      let totalRef = 0;
+      let totalBal = 0, totalRef = 0;
 
-      for (let i = 0; i < rows.length; i++) {
-        const r = rows[i];
-        const uId = String(r[0] || "").replace(/["']/g, "").trim();
-        if (!uId || !/^\d+$/.test(uId)) continue;
+      data.table.rows.forEach(r => {
+        if (!r.c || !r.c[0] || r.c[0].v === null) return;
+        const uId = String(r.c[0].v).trim();
+        if (!/^\d+$/.test(uId)) return;
 
-        const bal = Number(r[1]) || 0;
-        const ref = Number(r[2]) || 0;
-        const tasks = String(r[4] || r[3] || "");
-        const status = String(r[5] || "Active");
+        const bal = (r.c[1] && r.c[1].v) ? Number(r.c[1].v) : 0;
+        const ref = (r.c[2] && r.c[2].v) ? Number(r.c[2].v) : 0;
+        const tasks = (r.c[4] && r.c[4].v) ? String(r.c[4].v) : ((r.c[3] && r.c[3].v) ? String(r.c[3].v) : "");
 
         totalBal += bal;
         totalRef += ref;
 
-        allUsers.push({ userId: uId, balance: bal, referrals: ref, tasks: tasks, status: status });
-      }
+        allUsers.push({ userId: uId, balance: bal, referrals: ref, tasks: tasks });
+      });
 
       document.getElementById("statUsers").innerText = allUsers.length.toLocaleString();
       document.getElementById("statBalance").innerText = totalBal.toLocaleString();
       document.getElementById("statRefs").innerText = totalRef.toLocaleString();
 
-      calculateTimeFilteredStats();
+      updateActiveStats();
       renderUsers(allUsers);
 
     } catch (e) {
-      body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--danger);">ዳታውን መጫን አልተቻለም።</td></tr>`;
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--danger);">ዳታውን መጫን አልተቻለም</td></tr>';
     }
   }
 
   function renderUsers(list) {
     const body = document.getElementById("usersBody");
     if (list.length === 0) {
-      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">ምንም ተጠቃሚ አልተገኘም</td></tr>';
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">ምንም ተጠቃሚ የለም</td></tr>';
       return;
     }
-
     body.innerHTML = list.slice(0, 100).map(u => `
       <tr>
         <td>${u.userId}</td>
@@ -321,86 +309,74 @@
   }
 
   function onSearchInput() {
-    const q = document.getElementById("searchInput").value.trim().toLowerCase();
-    if (!q) {
-      renderUsers(allUsers);
-      return;
-    }
-    const filtered = allUsers.filter(u => u.userId.includes(q));
-    renderUsers(filtered);
+    const q = document.getElementById("searchInput").value.trim();
+    if (!q) { renderUsers(allUsers); return; }
+    renderUsers(allUsers.filter(u => u.userId.includes(q)));
   }
 
-  function parseCSV(text) {
-    const lines = text.split(/\r?\n/);
-    return lines.map(line => {
-      const match = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-      return match ? match.map(m => m.replace(/^"|"$/g, "").trim()) : line.split(",");
-    });
-  }
-
-  // --- BROADCAST (RAILWAY) ---
+  // 🚀 Broadcast የመላኪያ ፈንክሽን (7,874ቱን User IDዎች በቀጥታ ያስረክባል)
   async function startBroadcast() {
-    const rUrl = document.getElementById("railwayUrl").value.trim().replace(/\/$/, "");
+    const sUrl = document.getElementById("serverUrl").value.trim().replace(/\/$/, "");
     const adminKey = document.getElementById("adminKey").value.trim();
     const text = document.getElementById("bcText").value.trim();
     const photo = document.getElementById("bcPhoto").value.trim();
     const btnText = document.getElementById("btnText").value.trim();
     const btnUrl = document.getElementById("btnUrl").value.trim();
 
-    if (!rUrl || !adminKey || !text) {
-      alert("እባክዎ Railway URL፣ Admin Key እና ጽሑፍ ያስገቡ!");
-      return;
-    }
+    if (!text) { alert("እባክዎ የመልእክት ጽሑፍ ያስገቡ!"); return; }
+    if (allUsers.length === 0) { alert("ተጠቃሚዎች እየተጫኑ ነው፤ 2 ሰከንድ ጠብቀው ይሞክሩ!"); return; }
 
-    localStorage.setItem("rUrl", rUrl);
-    localStorage.setItem("rKey", adminKey);
+    if (!confirm(`እርግጠኛ ነዎት ለሁሉም ${allUsers.length.toLocaleString()} ተጠቃሚዎች እንዲላክ ይፈልጋሉ?`)) return;
 
-    if (!confirm("እርግጠኛ ነዎት መልእክቱ ለሁሉም 7,800+ ተጠቃሚዎች እንዲላክ ይፈልጋሉ?")) return;
+    const userIdsList = allUsers.map(u => u.userId);
 
     try {
-      const res = await fetch(`${rUrl}/start-broadcast`, {
+      const res = await fetch(`${sUrl}/start-broadcast`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
-        body: JSON.stringify({ text, photo, btnText, btnUrl })
+        body: JSON.stringify({
+          text: text,
+          photo: photo,
+          btnText: btnText,
+          btnUrl: btnUrl,
+          userIds: userIdsList
+        })
       });
       const data = await res.json();
       if (data.success) {
         document.getElementById("progressBox").style.display = "block";
-        trackProgress(rUrl);
+        trackProgress(sUrl);
       } else {
         alert(data.message);
       }
-    } catch (e) { alert("የግንኙነት ችግር፡ " + e.message); }
+    } catch (e) {
+      alert("የግንኙነት ስህተት ተከስቷል!");
+    }
   }
 
   async function controlBroadcast(action) {
-    const rUrl = document.getElementById("railwayUrl").value.trim().replace(/\/$/, "");
+    const sUrl = document.getElementById("serverUrl").value.trim().replace(/\/$/, "");
     const adminKey = document.getElementById("adminKey").value.trim();
-    await fetch(`${rUrl}/${action}`, {
-      method: "POST",
-      headers: { "x-admin-key": adminKey }
-    });
+    await fetch(`${sUrl}/${action}`, { method: "POST", headers: { "x-admin-key": adminKey } });
   }
 
-  function trackProgress(rUrl) {
-    const statusInterval = setInterval(async () => {
+  function trackProgress(sUrl) {
+    const timer = setInterval(async () => {
       try {
-        const res = await fetch(`${rUrl}/status`);
+        const res = await fetch(`${sUrl}/status`);
         const data = await res.json();
-
         document.getElementById("bcBadge").innerText = data.status;
         const totalSent = data.sent + data.failed;
         const percent = data.total > 0 ? Math.round((totalSent / data.total) * 100) : 0;
-
         document.getElementById("progressText").innerText = `የተላከ፡ ${data.sent} | ስህተት፡ ${data.failed} | ጠቅላላ፡ ${data.total}`;
         document.getElementById("progressPercent").innerText = `${percent}%`;
         document.getElementById("progressBar").style.width = `${percent}%`;
 
         if (!data.isRunning && data.status === "Finished") {
-          clearInterval(statusInterval);
+          clearInterval(timer);
           alert("🎉 Broadcast በሙሉ ተጠናቋል!");
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {}
     }, 2000);
   }
 </script>
